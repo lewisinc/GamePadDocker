@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E00202C1A2BDC07005C6DA7 /* CGEventHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E00202B1A2BDC07005C6DA7 /* CGEventHandler.m */; };
+		8E00202E1A2BDE21005C6DA7 /* KeyCodeRepresentations.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8E00202D1A2BDE21005C6DA7 /* KeyCodeRepresentations.plist */; };
 		8EF27DBE1A204BE7003E5F61 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EF27DBD1A204BE7003E5F61 /* AppDelegate.m */; };
 		8EF27DC01A204BE7003E5F61 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EF27DBF1A204BE7003E5F61 /* main.m */; };
 		8EF27DC31A204BE7003E5F61 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EF27DC21A204BE7003E5F61 /* ViewController.m */; };
@@ -26,6 +28,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8E00202A1A2BDC07005C6DA7 /* CGEventHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGEventHandler.h; sourceTree = "<group>"; };
+		8E00202B1A2BDC07005C6DA7 /* CGEventHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CGEventHandler.m; sourceTree = "<group>"; };
+		8E00202D1A2BDE21005C6DA7 /* KeyCodeRepresentations.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = KeyCodeRepresentations.plist; sourceTree = "<group>"; };
 		8EF27DB71A204BE7003E5F61 /* GamePadDocker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GamePadDocker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EF27DBB1A204BE7003E5F61 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8EF27DBC1A204BE7003E5F61 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -83,8 +88,11 @@
 				8EF27DBD1A204BE7003E5F61 /* AppDelegate.m */,
 				8EF27DC11A204BE7003E5F61 /* ViewController.h */,
 				8EF27DC21A204BE7003E5F61 /* ViewController.m */,
+				8E00202A1A2BDC07005C6DA7 /* CGEventHandler.h */,
+				8E00202B1A2BDC07005C6DA7 /* CGEventHandler.m */,
 				8EF27DC41A204BE7003E5F61 /* Images.xcassets */,
 				8EF27DC61A204BE7003E5F61 /* Main.storyboard */,
+				8E00202D1A2BDE21005C6DA7 /* KeyCodeRepresentations.plist */,
 				8EF27DBA1A204BE7003E5F61 /* Supporting Files */,
 			);
 			path = GamePadDocker;
@@ -196,6 +204,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E00202E1A2BDE21005C6DA7 /* KeyCodeRepresentations.plist in Resources */,
 				8EF27DC51A204BE7003E5F61 /* Images.xcassets in Resources */,
 				8EF27DC81A204BE7003E5F61 /* Main.storyboard in Resources */,
 			);
@@ -216,6 +225,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8EF27DC31A204BE7003E5F61 /* ViewController.m in Sources */,
+				8E00202C1A2BDC07005C6DA7 /* CGEventHandler.m in Sources */,
 				8EF27DC01A204BE7003E5F61 /* main.m in Sources */,
 				8EF27DBE1A204BE7003E5F61 /* AppDelegate.m in Sources */,
 			);
@@ -404,6 +414,7 @@
 				8EF27DD91A204BE7003E5F61 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8EF27DDA1A204BE7003E5F61 /* Build configuration list for PBXNativeTarget "GamePadDockerTests" */ = {
 			isa = XCConfigurationList;
@@ -412,6 +423,7 @@
 				8EF27DDC1A204BE7003E5F61 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
