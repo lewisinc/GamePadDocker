@@ -9,14 +9,19 @@
 #import "ViewController.h"
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <EventKit/EventKit.h>
+#import "CGEventHandler.h"
 
 #define TRANSFER_SERVICE_UUID                           @"B8C9D2F5-AB53-4D4A-8F41-C764EA5577C9"
 #define GAMEPAD_STATE_CHARACTERISTIC_UUID               @"4B0CDC50-C3F6-4D64-8001-2C361BEF1D99"
 #define GAMEPAD_CONFIGURATION_CHARACTERISTIC_UUID       @"3E128AE1-4BD6-4F7D-A49E-B3E789E6C4AC"
+#define SHOULD_DISCONNECT_CHARACTERISTIC_UUID           @"26B30EA8-1652-4EFF-9449-ECE0A6A8E241"
 
-@interface ViewController () <CBCentralManagerDelegate, CBPeripheralDelegate>
-@property (weak) IBOutlet NSTextField *windowText;
-@property (weak) IBOutlet NSButton *startScanningButton;
+@interface ViewController () <CBCentralManagerDelegate, CBPeripheralDelegate> {
+    NSString *scanInstructions, *stopInstructions;
+    CGEventHandler *eventHandler;
+}
+@property (weak) IBOutlet NSButton                  *stopScanningButton;
+@property (weak) IBOutlet NSButton                  *startScanningButton;
 @property (strong, nonatomic) CBCentralManager      *centralManager;
 @property (strong, nonatomic) CBPeripheral          *discoveredPeripheral;
 @property (strong, nonatomic) NSMutableData         *data;
@@ -28,7 +33,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+    scanInstructions = @"Press 'Begin Scanning for Device' to begin.";
+    stopInstructions = @"Press 'Stop Scanning' to cancel scan.";
+    eventHandler = [[CGEventHandler alloc] init];
     //Load KeyCodes into memory.
     NSString *path = [[NSBundle mainBundle] pathForResource:@"KeyCodeRepresentations" ofType:@"plist"];
     keyCodes = [[NSMutableDictionary alloc] initWithContentsOfFile:path];
@@ -41,10 +48,16 @@
 
     // Update the view, if already loaded.
 }
+- (IBAction)stopScanning:(id)sender {
+    [self.startScanningButton setHidden:NO];
+    [self.stopScanningButton setHidden:YES];
+    [self cleanup];
+}
 
 - (IBAction)beginScanning:(id)sender {
     _centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
     [_startScanningButton setHidden:YES];
+    [_stopScanningButton setHidden:NO];
     [self scan];
 }
 
@@ -56,23 +69,34 @@
  */
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central
 {
-    if (central.state != CBCentralManagerStatePoweredOn) {
-        // In a real app, you'd deal with all the states correctly
+    CBCentralManagerState currentState = central.state;
+    
+    if (currentState != CBCentralManagerStatePoweredOn) {
+        if (currentState == CBCentralManagerStateUnsupported)
+            NSLog(@"CBCentralManager NOT SUPPORTED!");
+        else if (currentState == CBCentralManagerStateResetting)
+            NSLog(@"CBCentralManager currently RESETTING.");
+        else if (currentState == CBCentralManagerStateUnauthorized)
+            NSLog(@"CBCentralManager is NOT AUTHORIZED for this device.");
+        else if (currentState == CBCentralManagerStateUnknown)
+            NSLog(@"CBCentralManager is in an UNKNOWN STATE.");
+        else if (currentState == CBCentralManagerStatePoweredOff)
+            NSLog(@"CBCentral is currently POWERED OFF.");
         return;
     }
-    
-    // The state must be CBCentralManagerStatePoweredOn...
-    
-    // ... so start scanning
-    [self scan];
-    
+    else if (currentState == CBCentralManagerStatePoweredOn) {
+        // The state must be CBCentralManagerStatePoweredOn...
+        // ... so start scanning
+        NSLog(@"CBCentralManager is powered on, starting SCAN.");
+        [self scan];
+    }
 }
 
 /** Scan for peripherals - specifically for our service's 128bit CBUUID
  */
 - (void)scan
 {
-    [self.centralManager scanForPeripheralsWithServices:@[[CBUUID UUIDWithString:TRANSFER_SERVICE_UUID]] options:@{ CBCentralManagerScanOptionAllowDuplicatesKey : @YES }];
+    [self.centralManager scanForPeripheralsWithServices:@[[CBUUID UUIDWithString:TRANSFER_SERVICE_UUID]] options:@{ CBCentralManagerScanOptionAllowDuplicatesKey : @"YES" }];
     
     NSLog(@"Scanning started");
 }
@@ -180,6 +204,10 @@
             [peripheral setNotifyValue:YES forCharacteristic:characteristic];
             NSLog(@"Set %@'s notifyValue to YES for characteristic UUID %@",peripheral.name, characteristic.UUID);
         }
+        else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:SHOULD_DISCONNECT_CHARACTERISTIC_UUID]]) {
+            [peripheral setNotifyValue:YES forCharacteristic:characteristic];
+            NSLog(@"Set %@'s notifyValue to YES for characteristic UUID %@",peripheral.name, characteristic.UUID);
+        }
     }
     
     // Once this is complete, we just need to wait for the data to come in.
@@ -191,10 +219,21 @@
         NSLog(@"Error discovering characteristics: %@", [error localizedDescription]);
         return;
     }
-    
-    
-//    [self.data setData:characteristic.value];
-//    
+
+    [self.data setData:characteristic.value];
+    if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:GAMEPAD_STATE_CHARACTERISTIC_UUID]]) {
+        [eventHandler updateState:self.data];
+    }
+    else if ([characteristic.UUID isEqualTo:[CBUUID UUIDWithString:GAMEPAD_CONFIGURATION_CHARACTERISTIC_UUID]]) {
+        [eventHandler updateConfig:self.data];
+    }
+    else if ([characteristic.UUID isEqualTo:[CBUUID UUIDWithString:SHOULD_DISCONNECT_CHARACTERISTIC_UUID]]) {
+        NSLog(@"Peripheral Disconnected");
+        self.discoveredPeripheral = nil;
+        [self.startScanningButton setHidden:NO];
+        [self cleanup];
+    }
+//
 ////    NSString *stringFromData = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];
 //
 //     //Have we got everything we need?
@@ -246,9 +285,8 @@
 {
     NSLog(@"Peripheral Disconnected");
     self.discoveredPeripheral = nil;
-    
-    // We're disconnected, so start scanning again
-    [self scan];
+    [self.startScanningButton setHidden:NO];
+    [self cleanup];
 }
 
 /** Call this when things either go wrong, or you're done with the connection.

@@ -7,7 +7,9 @@
 //
 
 #import <Cocoa/Cocoa.h>
-
+@protocol GameDockerDelegate
+- (void)cleanup;
+@end
 @interface ViewController : NSViewController
 
 
